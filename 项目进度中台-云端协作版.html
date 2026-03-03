@@ -1491,15 +1491,35 @@ async function saveMember(){
 async function init(){
   setSyncUI('connecting');
   const ok=await fetchAll(true);
-  if(ok){
-    document.getElementById('loadingScreen').style.display='none';
-    document.getElementById('app').style.display='flex';
-
-    window.addEventListener('resize',()=>{if(currentPage==='dashboard')renderDashboard();});
-    loadBidConfig();
-    await fetchBids();
-    restartBidMonitor();
+  
+  if(!ok){
+    // 云端连接失败，使用本地存储
+    console.log('云端连接失败，切换到本地存储模式');
+    projects = JSON.parse(localStorage.getItem('projects') || '[]');
+    contracts = JSON.parse(localStorage.getItem('contracts') || '[]');
+    members = JSON.parse(localStorage.getItem('members') || '[]');
+    memberProjects = JSON.parse(localStorage.getItem('memberProjects') || '[]');
+    renderProjects(); updateProjStats();
+    renderContracts(); updateContractStats();
+    renderTeam(); updateTeamStats();
+    renderDashboard();
   }
+  
+  document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+
+  window.addEventListener('resize',()=>{if(currentPage==='dashboard')renderDashboard();});
+  loadBidConfig();
+  await fetchBids();
+  restartBidMonitor();
+  
+  // 每30秒自动保存到本地
+  setInterval(()=>{
+    localStorage.setItem('projects', JSON.stringify(projects));
+    localStorage.setItem('contracts', JSON.stringify(contracts));
+    localStorage.setItem('members', JSON.stringify(members));
+    localStorage.setItem('memberProjects', JSON.stringify(memberProjects));
+  }, 30000);
 }
 
 // ══════════════════════════════════════════
