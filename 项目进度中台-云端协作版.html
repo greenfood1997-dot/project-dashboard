@@ -320,10 +320,10 @@ canvas{max-width:100%;}
       <div class="topbar">
         <div class="page-title">项目进度<span class="page-sub">/ 全部项目</span></div>
         <div class="topbar-right">
-          <button class="btn btn-outline btn-sm" onclick="openImportModal()">
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-  导入表格
-</button>
+          <button class="btn btn-outline btn-sm" onclick="importCSV()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            导入
+          </button>
           <button class="btn btn-outline btn-sm" onclick="exportCSV()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             导出
@@ -866,24 +866,9 @@ const KEY = 'sb_publishable_vWE3AOVnvXZ-lnpW39K8XA_Ljq2c7jC';
 const HDR = {'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'return=representation'};
 
 async function api(path, opt={}) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-  try {
-    const r = await fetch(SB+'/rest/v1/'+path, {
-      headers:{...HDR,...(opt.headers||{})},
-      ...opt,
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    if(!r.ok){const t=await r.text();throw new Error(t||r.statusText);}
-    const t = await r.text(); return t?JSON.parse(t):null;
-  } catch (e) {
-    clearTimeout(timeoutId);
-    if (e.name === 'AbortError') {
-      throw new Error('连接超时');
-    }
-    throw e;
-  }
+  const r = await fetch(SB+'/rest/v1/'+path, {headers:{...HDR,...(opt.headers||{})}, ...opt});
+  if(!r.ok){const t=await r.text();throw new Error(t||r.statusText);}
+  const t = await r.text(); return t?JSON.parse(t):null;
 }
 
 async function uploadFile(file, bucket='contracts') {
@@ -940,38 +925,25 @@ function setSyncUI(s){
 async function fetchAll(init=false){
   setSyncUI('syncing');
   try{
-    // 使用Promise.allSettled，即使部分失败也继续
-    const results = await Promise.allSettled([
+    const [pData,cData,mData,mpData]=await Promise.all([
       api('projects?order=created_at.desc'),
       api('contracts?order=created_at.desc'),
       api('members?order=created_at.desc'),
       api('member_projects?order=created_at.desc')
     ]);
-    
-    // 检查是否有任何请求成功
-    const hasSuccess = results.some(r => r.status === 'fulfilled');
-    if (!hasSuccess) {
-      throw new Error('所有请求失败');
-    }
-    
-    // 处理成功的结果
-    const pData = results[0].status === 'fulfilled' ? results[0].value : [];
-    const cData = results[1].status === 'fulfilled' ? results[1].value : [];
-    const mData = results[2].status === 'fulfilled' ? results[2].value : [];
-    const mpData = results[3].status === 'fulfilled' ? results[3].value : [];
-    
     projects=(pData||[]).map(fromP);
-    contracts=(cData||[]).map(fromC);
-    members=(mData||[]).map(fromMem);
-    memberProjects=(mpData||[]);
-    renderProjects(); updateProjStats();
-    renderContracts(); updateContractStats();
-    renderTeam(); updateTeamStats();
-    renderDashboard();
-    updateProjectDropdowns();
+      contracts=(cData||[]).map(fromC);
+      members=(mData||[]).map(fromMem);
+      memberProjects=(mpData||[]);
+      renderProjects(); updateProjStats();
+      renderContracts(); updateContractStats();
+      renderTeam(); updateTeamStats();
+      renderDashboard();
+      updateProjectDropdowns();
     setSyncUI('connected'); return true;
   }catch(e){
     console.error(e); setSyncUI('error');
+    if(init) document.getElementById('loadingMsg').innerHTML=`<div style="text-align:center"><div style="color:#dc2626;font-weight:700;margin-bottom:8px">连接失败</div><div style="color:#5a6070;font-size:12px;margin-bottom:12px">${e.message}</div><button class="btn btn-primary btn-sm" onclick="location.reload()">重新连接</button></div>`;
     return false;
   }
 }
@@ -1519,35 +1491,15 @@ async function saveMember(){
 async function init(){
   setSyncUI('connecting');
   const ok=await fetchAll(true);
-  
-  if(!ok){
-    // 云端连接失败，使用本地存储
-    console.log('云端连接失败，切换到本地存储模式');
-    projects = JSON.parse(localStorage.getItem('projects') || '[]');
-    contracts = JSON.parse(localStorage.getItem('contracts') || '[]');
-    members = JSON.parse(localStorage.getItem('members') || '[]');
-    memberProjects = JSON.parse(localStorage.getItem('memberProjects') || '[]');
-    renderProjects(); updateProjStats();
-    renderContracts(); updateContractStats();
-    renderTeam(); updateTeamStats();
-    renderDashboard();
-  }
-  
-  document.getElementById('loadingScreen').style.display='none';
-  document.getElementById('app').style.display='flex';
+  if(ok){
+    document.getElementById('loadingScreen').style.display='none';
+    document.getElementById('app').style.display='flex';
 
-  window.addEventListener('resize',()=>{if(currentPage==='dashboard')renderDashboard();});
-  loadBidConfig();
-  await fetchBids();
-  restartBidMonitor();
-  
-  // 每30秒自动保存到本地
-  setInterval(()=>{
-    localStorage.setItem('projects', JSON.stringify(projects));
-    localStorage.setItem('contracts', JSON.stringify(contracts));
-    localStorage.setItem('members', JSON.stringify(members));
-    localStorage.setItem('memberProjects', JSON.stringify(memberProjects));
-  }, 30000);
+    window.addEventListener('resize',()=>{if(currentPage==='dashboard')renderDashboard();});
+    loadBidConfig();
+    await fetchBids();
+    restartBidMonitor();
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1832,181 +1784,54 @@ async function requestNotifyPermission(){
   else toast('通知权限被拒绝，请在浏览器设置中开启','err');
 }
 
-// ==================== 智能表格导入功能 ====================
-let importData = [];
+init();
 
-function openImportModal() {
-  document.getElementById('importOverlay').classList.add('show');
-  document.getElementById('importPreview').style.display = 'none';
-document.getElementById('confirmImportBtn').style.display = 'none';
-importData = [];
+// ==================== CSV导入功能 ====================
+function importCSV(){
+  const input=document.createElement('input');
+  input.type='file';
+  input.accept='.csv';
+  input.onchange=async(e)=>{
+    const file=e.target.files[0];
+    if(!file)return;
+    const text=await file.text();
+    const lines=text.trim().split('\n');
+    const headers=lines[0].split(',').map(h=>h.trim());
+    const newProjects=[];
+    for(let i=1;i<lines.length;i++){
+      const vals=lines[i].split(',').map(v=>v.trim());
+      const row={};
+      headers.forEach((h,idx)=>row[h]=vals[idx]||'');
+      const progress=parseInt(row['当前进度']||row['进度']||'0');
+      const budget=parseFloat(row['预算']||row['预算金额']||'0')*10000;
+      newProjects.push({
+        id:'P'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),
+        name:row['项目名称']||row['项目']||'未命名',
+        code:row['项目编号']||'',
+        status:progress>=100?'done':'active',
+        start_date:row['开始日期']||'',
+        end_date:row['截止日期']||row['结束日期']||'',
+        cost_target:budget,
+        cost_actual:budget*(progress/100),
+        payment_target:budget,
+        payment_actual:budget*(progress/100)*0.8,
+        advance_target:budget*0.3,
+        advance_actual:budget*0.3*(progress/100),
+        owner:row['负责人']||row['执行人']||'未分配',
+        type:row['项目类型']||row['类型']||'其他',
+        priority:row['优先级']||'P2-一般',
+        progress:progress,
+        created_at:new Date().toISOString()
+      });
+    }
+    projects=[...projects,...newProjects];
+    localStorage.setItem('projects',JSON.stringify(projects));
+    renderProjects();
+    updateStats();
+    alert('成功导入'+newProjects.length+'个项目');
+  };
+  input.click();
 }
-
-function closeImportModal() {
-document.getElementById('importOverlay').classList.remove('show');
-}
-
-function handleImportFile(input) {
-if (!input.files.length) return;
-const file = input.files[0];
-const reader = new FileReader();
-reader.onload = function(e) {
-parseImportCSV(e.target.result);
-};
-reader.readAsText(file);
-}
-
-function parseImportCSV(text) {
-const lines = text.trim().split('\n');
-const headers = lines[0].split(',').map(h => h.trim());
-
-importData = [];
-for (let i = 1; i < lines.length; i++) {
-const vals = lines[i].split(',').map(v => v.trim());
-const row = {};
-headers.forEach((h, idx) => row[h] = vals[idx] || '');
-const progress = parseInt(row['当前进度'] || row['进度'] || '0');
-importData.push({
-  id: 'P' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
-  name: row['项目名称'] || row['项目'] || '未命名',
-  code: '',
-  status: progress >= 100 ? 'done' : 'active',
-  start_date: row['开始日期'] || '',
-  end_date: row['截止日期'] || row['结束日期'] || '',
-  cost_target: parseFloat(row['预算'] || '0') * 10000,
-  cost_actual: parseFloat(row['预算'] || '0') * 10000 * (progress / 100),
-  payment_target: parseFloat(row['预算'] || '0') * 10000,
-  payment_actual: parseFloat(row['预算'] || '0') * 10000 * (progress / 100) * 0.8,
-  advance_target: parseFloat(row['预算'] || '0') * 10000 * 0.3,
-  advance_actual: parseFloat(row['预算'] || '0') * 10000 * 0.3 * (progress / 100),
-  owner: row['负责人'] || row['执行人'] || '未分配',
-  type: classifyImportType(row['项目类型'] || row['类型'] || ''),
-  priority: classifyImportPriority(row['优先级'] || ''),
-  progress: progress,
-  created_at: new Date().toISOString()
-});
-}
-
-showImportPreview();
-}
-
-function classifyImportType(type) {
-const t = type.toLowerCase();
-if (t.includes('marketing') || t.includes('promotion') || t.includes('advertising')) return 'marketing promotion';
-if (t.includes('R&D') || t.includes('product') || t.includes('development')) return 'product R&D';
-if (t.includes('Operation') || t.includes('Operation and Maintenance')) return 'Operation Support';
-if (t.includes('Business') || t.includes('Cooperation') || t.includes('Sales')) return 'Business Cooperation';
-return 'Other';
-}
-
-function classifyImportPriority(p) {
-const priority = p.toLowerCase();
-if (priority.includes('Urgent') || priority.includes('P0')) return 'P0-Urgent';
-if (priority.includes('Important') || priority.includes('P1')) return 'P1-Important';
-if (priority.includes('Low') || priority.includes('P3')) return 'P3-Low Priority';
-return 'P2-General';
-}
-
-function showImportPreview() {
-document.getElementById('importPreview').style.display = 'block';
-document.getElementById('confirmImportBtn').style.display = 'inline-flex';
-
-document.getElementById('previewTotal').textContent = importData.length;
-
-const categories = new Set(importData.map(d => d.type)).size;
-document.getElementById('previewCategories').textContent = categories;
-
-const highPriority = importData.filter(d => d.priority.includes('P0') || d.priority.includes('P1')).length;
-document.getElementById('previewHighPriority').textContent = highPriority;
-
-const tbody = document.getElementById('previewTableBody');
-
-tbody.innerHTML = importData.slice(0, 10).map(p => {
-const progressColor = p.progress >= 80? '#16a34a' : p.progress >= 50? '#f97316' : '#dc2626';
-return <tr style="border-bottom:1px solid #f5f6f8"> <td style="padding:8px 12px">${p.name}</td> <td style="padding:8px 12px">${p.owner}</td> <td style="padding:8px 12px"><span class="pill" style="background:#eff4ff;color:#2563eb;font-size:10px">${p.type}</span></td> <td style="padding:8px 12px;text-align:center"> <div style="display:flex;align-items:center;gap:6px"> <div style="flex:1;height:4px;background:#eef0f4;border-radius:2px;overflow:hidden"> <div style="width:${p.progress}%;height:100%;background:${progressColor};border-radius:2px"></div> </div> <span style="font-size:11px;font-weight:600;color:${progressColor}">${p.progress}%</span> </div> </td> </tr>;
-}).join('');
-
-if (importData.length > 10) {
-tbody.innerHTML += <tr><td colspan="4" style="padding:12px;text-align:center;color:#9ba3b0;font-size:12px">还有 ${importData.length - 10} 个项目...</td></tr>;
-}
-}
-
-async function confirmImport() {
-if (!importData.length) return;
-
-const btn = document.getElementById('confirmImportBtn');
-btn.disabled = true;
-btn.innerHTML = '<span class="sp"></span>导入中...';
-
-try {
-// 添加到本地存储
-const existing = JSON.parse(localStorage.getItem('projects') || '[]');
-localStorage.setItem('projects', JSON.stringify([...existing,...importData]));
-// 更新内存中的projects数组
-projects = [...projects, ...importData];
-closeImportModal();
-renderProjects();
-updateStats();
-toast(`成功导入 ${importData.length} 个项目`, 'ok');
-} catch (err) {
-toast('导入失败：' + err.message, 'err');
-} finally {
-btn.disabled = false;
-btn.innerHTML = '确认导入';
-}
-}
----
-  init();
 </script>
-<!-- 导入模态框 -->
-<div class="overlay" id="importOverlay" onclick="if(event.target===this)closeImportModal()">
-  <div class="modal" style="max-width:720px">
-    <div class="modal-head">
-      <div>
-        <div class="modal-title">📥 智能表格导入</div>
-        <div class="modal-sub">支持 CSV 自动识别与分类</div>
-      </div>
-      <button class="close-btn" onclick="closeImportModal()">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="file-area" id="dropZone" style="padding:40px 20px" onclick="document.getElementById('importFileInput').click()">
-        <input type="file" id="importFileInput" style="display:none" accept=".csv" onchange="handleImportFile(this)">
-        <div style="text-align:center">
-          <div style="font-size:48px;margin-bottom:16px">📊</div>
-          <div style="font-size:16px;font-weight:600;margin-bottom:8px">点击或拖拽上传 CSV</div>
-          <div style="font-size:13px;color:#9ba3b0">自动识别：项目名称、负责人、日期、进度、类型、优先级</div>
-        </div>
-      </div>
-      <div id="importPreview" style="display:none;margin-top:16px">
-        <div style="display:flex;gap:12px;margin-bottom:16px">
-          <div style="flex:1;padding:12px;background:#f0fdf4;border-radius:8px;text-align:center">
-            <div style="font-size:24px;font-weight:700;color:#16a34a" id="previewTotal">0</div>
-            <div style="font-size:12px;color:#5a6070">识别项目</div>
-          </div>
-          <div style="flex:1;padding:12px;background:#eff4ff;border-radius:8px;text-align:center">
-            <div style="font-size:24px;font-weight:700;color:#2563eb" id="previewCategories">0</div>
-            <div style="font-size:12px;color:#5a6070">分类类别</div>
-          </div>
-          <div style="flex:1;padding:12px;background:#fef3c7;border-radius:8px;text-align:center">
-            <div style="font-size:24px;font-weight:700;color:#d97706" id="previewHighPriority">0</div>
-            <div style="font-size:12px;color:#5a6070">高优先级</div>
-          </div>
-        </div>
-        <div style="max-height:300px;overflow:auto;border:1px solid #e8eaed;border-radius:8px">
-          <table style="width:100%;font-size:12px;border-collapse:collapse">
-            <thead style="background:#f8f9fa;position:sticky;top:0">
-              <tr><th style="padding:8px 12px;text-align:left">项目名称</th><th style="padding:8px 12px;text-align:left">负责人</th><th style="padding:8px 12px;text-align:left">分类</th><th style="padding:8px 12px;text-align:center">进度</th></tr>
-            </thead>
-            <tbody id="previewTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeImportModal()">取消</button>
-      <button class="btn btn-primary" id="confirmImportBtn" onclick="confirmImport()" style="display:none">确认导入</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
