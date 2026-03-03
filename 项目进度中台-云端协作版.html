@@ -866,9 +866,24 @@ const KEY = 'sb_publishable_vWE3AOVnvXZ-lnpW39K8XA_Ljq2c7jC';
 const HDR = {'Content-Type':'application/json','apikey':KEY,'Authorization':'Bearer '+KEY,'Prefer':'return=representation'};
 
 async function api(path, opt={}) {
-  const r = await fetch(SB+'/rest/v1/'+path, {headers:{...HDR,...(opt.headers||{})}, ...opt});
-  if(!r.ok){const t=await r.text();throw new Error(t||r.statusText);}
-  const t = await r.text(); return t?JSON.parse(t):null;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  try {
+    const r = await fetch(SB+'/rest/v1/'+path, {
+      headers:{...HDR,...(opt.headers||{})},
+      ...opt,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if(!r.ok){const t=await r.text();throw new Error(t||r.statusText);}
+    const t = await r.text(); return t?JSON.parse(t):null;
+  } catch (e) {
+    clearTimeout(timeoutId);
+    if (e.name === 'AbortError') {
+      throw new Error('连接超时');
+    }
+    throw e;
+  }
 }
 
 async function uploadFile(file, bucket='contracts') {
