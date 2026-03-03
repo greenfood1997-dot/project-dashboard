@@ -1,11 +1,127 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>项目进度中台</title>
-<meta http-equiv="refresh" content="0;url=./项目进度中台-云端协作版.html">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'PingFang SC','Microsoft YaHei',sans-serif;}
+body{background:#f5f6f8;padding:20px;}
+.container{max-width:1200px;margin:0 auto;}
+.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-bottom:20px;}
+h1{color:#2563eb;margin-bottom:10px;}
+.upload{border:3px dashed #2563eb;border-radius:12px;padding:40px;text-align:center;cursor:pointer;background:#fff;}
+.upload:hover{background:#eff4ff;}
+#file{display:none;}
+.btn{background:#2563eb;color:#fff;padding:10px 25px;border-radius:6px;border:none;cursor:pointer;margin-top:10px;}
+table{width:100%;border-collapse:collapse;margin-top:15px;font-size:13px;}
+th,td{padding:10px;border-bottom:1px solid #e5e7eb;text-align:left;}
+th{background:#f8fafc;}
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;margin:2px;}
+</style>
 </head>
 <body>
-<p>正在跳转... <a href="./项目进度中台-云端协作版.html">点击这里</a></p>
+<div class="container">
+  <div class="card">
+    <h1>📊 项目进度中台</h1>
+    <p style="color:#666;">智能表格导入系统</p>
+  </div>
+  
+  <div class="card upload" onclick="document.getElementById('file').click()">
+    <input type="file" id="file" accept=".csv" onchange="loadFile(this)">
+    <div style="font-size:40px;">📁</div>
+    <h3>点击上传 CSV 文件</h3>
+    <p style="color:#666;font-size:14px;margin-top:8px;">支持：项目名称、负责人、日期、进度、类型、优先级</p>
+    <button class="btn">选择文件</button>
+  </div>
+  
+  <div class="card" id="result" style="display:none;">
+    <h3>📋 导入结果</h3>
+    <div id="stats" style="display:flex;gap:15px;margin:15px 0;"></div>
+    <div id="table"></div>
+    <button class="btn" onclick="saveData()">保存到本地</button>
+  </div>
+</div>
+<script>
+let data = [];
+function loadFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    parseCSV(e.target.result);
+  };
+  reader.readAsText(file);
+}
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+  
+  data = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => v.trim());
+    const row = {};
+    headers.forEach((h, idx) => row[h] = vals[idx] || '');
+    
+    data.push({
+      name: row['项目名称'] || row['项目'] || '未命名',
+      owner: row['负责人'] || row['执行人'] || '未分配',
+      start: row['开始日期'] || '',
+      end: row['截止日期'] || row['结束日期'] || '',
+      progress: parseInt(row['当前进度'] || row['进度'] || '0'),
+      type: getType(row['项目类型'] || row['类型'] || ''),
+      priority: getPriority(row['优先级'] || ''),
+      status: parseInt(row['当前进度'] || '0') >= 100 ? '已完成' : '进行中'
+    });
+  }
+  
+  showResult();
+}
+function getType(t) {
+  t = t.toLowerCase();
+  if (t.includes('营销') || t.includes('推广')) return '营销推广';
+  if (t.includes('研发') || t.includes('产品')) return '产品研发';
+  if (t.includes('运营')) return '运营支持';
+  if (t.includes('商务')) return '商务合作';
+  return '其他';
+}
+function getPriority(p) {
+  p = p.toLowerCase();
+  if (p.includes('紧急') || p.includes('p0')) return 'P0-紧急';
+  if (p.includes('重要') || p.includes('p1')) return 'P1-重要';
+  if (p.includes('低') || p.includes('p3')) return 'P3-低优';
+  return 'P2-一般';
+}
+function showResult() {
+  document.getElementById('result').style.display = 'block';
+  
+  // 统计
+  const types = {}, pris = {};
+  let done = 0, high = 0;
+  data.forEach(d => {
+    types[d.type] = (types[d.type] || 0) + 1;
+    pris[d.priority] = (pris[d.priority] || 0) + 1;
+    if (d.status === '已完成') done++;
+    if (d.priority.includes('P0') || d.priority.includes('P1')) high++;
+  });
+
+document.getElementById('stats').innerHTML = <div class="card" style="flex:1;text-align:center;"><div style="font-size:28px;font-weight:bold;color:#2563eb;">${data.length}</div><div style="color:#666;">项目总数</div></div> <div class="card" style="flex:1;text-align:center;"><div style="font-size:28px;font-weight:bold;color:#f59e0b;">${Object.keys(types).length}</div><div style="color:#666;">分类数量</div></div> <div class="card" style="flex:1;text-align:center;"><div style="font-size:28px;font-weight:bold;color:#ef4444;">${high}</div><div style="color:#666;">高优先级</div></div> <div class="card" style="flex:1;text-align:center;"><div style="font-size:28px;font-weight:bold;color:#10b981;">${done}</div><div style="color:#666;">已完成</div></div>;
+
+// 表格
+let html = '<table><tr><th>项目名称</th><th>负责人</th><th>类型</th><th>优先级</th><th>进度</th><th>状态</th></tr>';
+data.forEach(d => {
+const pColor = d.priority.includes('P0') ? '#fee2e2;color:#991b1b' : d.priority.includes('P1') ? '#fef3c7;color:#92400e' : '#d1fae5;color:#065f46';
+html += <tr> <td>${d.name}</td> <td>${d.owner}</td> <td><span class="tag" style="background:#dbeafe;color:#1e40af;">${d.type}</span></td> <td><span class="tag" style="background:${pColor};">${d.priority}</span></td> <td>${d.progress}%</td> <td>${d.status}</td> </tr>;
+});
+html += '</table>';
+document.getElementById('table').innerHTML = html;
+}
+
+function saveData() {
+localStorage.setItem('projects', JSON.stringify(data));
+alert('已保存 ' + data.length + ' 个项目到本地存储！');
+}
+</script>
 </body>
 </html>
