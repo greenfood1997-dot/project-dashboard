@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>项目进度中台</title>
+<title>项目进度中台 - 完整版</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'PingFang SC','Microsoft YaHei',sans-serif;}
 body{background:#f5f6f8;}
@@ -21,13 +21,15 @@ body{background:#f5f6f8;}
 .btn-outline{background:#fff;color:#1a1d23;border:1px solid #dde0e6;}
 .btn-outline:hover{background:#f5f6f8;}
 .btn-sm{padding:5px 10px;font-size:12px;}
+.btn-danger{background:#dc2626;color:#fff;}
+.btn-danger:hover{background:#b91c1c;}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
 .stat-card{background:#fff;border:1px solid #e8eaed;border-radius:10px;padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
 .stat-num{font-size:24px;font-weight:700;line-height:1;margin-bottom:4px;color:#2563eb;}
 .stat-label{font-size:12px;color:#5a6070;}
 .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
-.search-wrap{flex:1;min-width:180px;max-width:280px;position:relative;}
-.search-input{width:100%;background:#fff;border:1px solid #dde0e6;border-radius:6px;padding:8px 12px 8px 34px;font-size:13px;outline:none;}
+.search-wrap{flex:1;min-width:180px;max-width:280px;}
+.search-input{width:100%;background:#fff;border:1px solid #dde0e6;border-radius:6px;padding:8px 12px;font-size:13px;outline:none;}
 .projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:14px;}
 .project-card{background:#fff;border:1px solid #e8eaed;border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
 .card-name{font-size:14px;font-weight:700;margin-bottom:8px;}
@@ -43,19 +45,40 @@ body{background:#f5f6f8;}
 .logo-wrap{padding:16px 18px 14px;border-bottom:1px solid #e8eaed;display:flex;align-items:center;gap:10px;}
 .logo-icon{width:32px;height:32px;background:#2563eb;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;}
 .empty-wrap{text-align:center;padding:60px 20px;}
-.empty-icon{margin-bottom:16px;}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;}
 .modal.show{display:flex;}
-.modal-content{background:#fff;border-radius:12px;width:90%;max-width:500px;max-height:90vh;overflow:auto;}
+.modal-content{background:#fff;border-radius:12px;width:90%;max-width:600px;max-height:90vh;overflow:auto;}
 .modal-head{padding:20px;border-bottom:1px solid #e8eaed;display:flex;justify-content:space-between;align-items:center;}
 .modal-title{font-size:16px;font-weight:700;}
 .modal-body{padding:20px;}
 .modal-foot{padding:15px 20px;border-top:1px solid #e8eaed;display:flex;justify-content:flex-end;gap:10px;}
 .form-group{margin-bottom:16px;}
 .form-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151;}
-.form-input{width:100%;padding:8px 12px;border:1px solid #dde0e6;border-radius:6px;font-size:13px;outline:none;}
-.form-input:focus{border-color:#2563eb;}
+.form-input,.form-select{width:100%;padding:8px 12px;border:1px solid #dde0e6;border-radius:6px;font-size:13px;outline:none;}
+.form-input:focus,.form-select:focus{border-color:#2563eb;}
 .filter-sel{background:#fff;border:1px solid #dde0e6;border-radius:6px;padding:8px 12px;font-size:13px;outline:none;cursor:pointer;}
+.tabs{display:flex;gap:10px;margin-bottom:20px;border-bottom:2px solid #e8eaed;}
+.tab{padding:10px 20px;cursor:pointer;font-size:14px;font-weight:500;color:#5a6070;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.tab.active{color:#2563eb;border-bottom-color:#2563eb;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+.member-card{display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border:1px solid #e8eaed;border-radius:8px;margin-bottom:10px;}
+.member-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;}
+.bid-card{background:#fff;border:1px solid #e8eaed;border-radius:10px;padding:16px;margin-bottom:12px;transition:all .2s;}
+.bid-card:hover{border-color:#2563eb;box-shadow:0 4px 12px rgba(0,0,0,.1);}
+.bid-card.new{border-left:4px solid #2563eb;}
+.bid-brand{font-size:12px;color:#2563eb;font-weight:600;margin-bottom:4px;}
+.bid-title{font-size:14px;font-weight:700;margin-bottom:8px;}
+.bid-meta{font-size:12px;color:#5a6070;margin-bottom:8px;}
+.bid-amount{font-size:14px;color:#f97316;font-weight:700;}
+.bid-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;margin-right:6px;background:#eff4ff;color:#2563eb;}
+.notification-banner{position:fixed;top:20px;right:20px;background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:200;max-width:400px;display:none;animation:slideIn .3s ease;}
+.notification-banner.show{display:block;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.monitor-status{position:fixed;bottom:20px;right:20px;background:#fff;border-radius:20px;padding:8px 16px;box-shadow:0 2px 10px rgba(0,0,0,.1);font-size:12px;display:flex;align-items:center;gap:8px;z-index:100;}
+.monitor-dot{width:8px;height:8px;border-radius:50%;background:#16a34a;animation:pulse 2s infinite;}
+.monitor-dot.paused{background:#9ba3b0;animation:none;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
 </style>
 </head>
 <body>
@@ -70,70 +93,125 @@ body{background:#f5f6f8;}
       <div class="logo-icon">项</div>
       <div>
         <div style="font-size:15px;font-weight:700;">项目进度中台</div>
-        <div style="font-size:10px;color:#9ba3b0;">云端协作版</div>
+        <div style="font-size:10px;color:#9ba3b0;">协作版</div>
       </div>
     </div>
     <div style="padding:10px 0;">
       <div class="nav-item active" onclick="showPage('projects')">📊 项目进度</div>
+      <div class="nav-item" onclick="showPage('team')">👥 团队协作</div>
+      <div class="nav-item" onclick="showPage('bids')">🔔 招标监测</div>
       <div class="nav-item" onclick="showPage('dashboard')">📈 数据看板</div>
     </div>
   </div>
   
   <div class="main">
-    <div class="topbar">
-      <div class="page-title">项目进度<span class="page-sub">/ 全部项目</span></div>
-      <div class="topbar-right">
-        <button class="btn btn-outline btn-sm" onclick="importCSV()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          导入
-        </button>
-        <button class="btn btn-outline btn-sm" onclick="exportCSV()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          导出
-        </button>
-        <button class="btn btn-primary" onclick="openModal()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          新建项目
-        </button>
+    <!-- 项目进度页面 -->
+    <div id="page-projects" class="page-content">
+      <div class="topbar">
+        <div class="page-title">项目进度<span class="page-sub">/ 全部项目</span></div>
+        <div class="topbar-right">
+          <button class="btn btn-outline btn-sm" onclick="importCSV()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            导入
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            导出
+          </button>
+          <button class="btn btn-primary" onclick="openModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            新建项目
+          </button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">项目总数</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:#f97316" id="statCost">¥0</div><div class="stat-label">累计成本</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:#16a34a" id="statPay">¥0</div><div class="stat-label">累计回款</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:#7c3aed" id="statNewBids">0</div><div class="stat-label">新招标</div></div>
+        </div>
+        <div class="toolbar">
+          <div class="search-wrap">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索项目名称" oninput="renderProjects()">
+          </div>
+          <select class="filter-sel" id="statusFilter" onchange="renderProjects()">
+            <option value="">全部状态</option>
+            <option value="active">进行中</option>
+            <option value="done">已完成</option>
+          </select>
+        </div>
+        <div id="projectsContainer" class="projects-grid"></div>
       </div>
     </div>
-    
-    <div class="content">
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-num" id="statTotal">0</div>
-          <div class="stat-label">项目总数</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" style="color:#f97316" id="statCost">¥0</div>
-          <div class="stat-label">累计成本</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" style="color:#16a34a" id="statPay">¥0</div>
-          <div class="stat-label">累计回款</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num" style="color:#7c3aed" id="statAdv">¥0</div>
-          <div class="stat-label">累计垫款</div>
+
+    <!-- 团队协作页面 -->
+    <div id="page-team" class="page-content" style="display:none;">
+      <div class="topbar">
+        <div class="page-title">团队协作<span class="page-sub">/ 成员管理</span></div>
+        <div class="topbar-right">
+          <button class="btn btn-primary" onclick="openMemberModal()">+ 添加成员</button>
         </div>
       </div>
-      
-      <div class="toolbar">
-        <div class="search-wrap">
-          <input type="text" class="search-input" id="searchInput" placeholder="搜索项目名称" oninput="renderProjects()">
-        </div>
-        <select class="filter-sel" id="statusFilter" onchange="renderProjects()">
-          <option value="">全部状态</option>
-          <option value="active">进行中</option>
-          <option value="done">已完成</option>
-        </select>
+      <div class="content">
+        <div id="membersContainer"></div>
       </div>
-      
-      <div id="projectsContainer" class="projects-grid"></div>
+    </div>
+
+    <!-- 招标监测页面 -->
+    <div id="page-bids" class="page-content" style="display:none;">
+      <div class="topbar">
+        <div class="page-title">招标监测<span class="page-sub">/ 实时监测</span></div>
+        <div class="topbar-right">
+          <button class="btn btn-outline btn-sm" onclick="toggleMonitor()" id="monitorBtn">
+            <span id="monitorStatus">⏸ 暂停监测</span>
+          </button>
+          <button class="btn btn-primary" onclick="refreshBids()">🔄 立即刷新</button>
+        </div>
+      </div>
+      <div class="content">
+        <div class="tabs">
+          <div class="tab active" onclick="showBidTab('all')">全部招标</div>
+          <div class="tab" onclick="showBidTab('new')">最新发布</div>
+          <div class="tab" onclick="showBidTab('auto')">🚗 汽车</div>
+          <div class="tab" onclick="showBidTab('media')">📱 新媒体</div>
+          <div class="tab" onclick="showBidTab('marketing')">📢 营销</div>
+        </div>
+        <div id="bidsContainer"></div>
+      </div>
+    </div>
+
+    <!-- 数据看板页面 -->
+    <div id="page-dashboard" class="page-content" style="display:none;">
+      <div class="topbar">
+        <div class="page-title">数据看板<span class="page-sub">/ 统计分析</span></div>
+      </div>
+      <div class="content">
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num" id="dashTotal">0</div><div class="stat-label">总项目</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:#16a34a" id="dashDone">0</div><div class="stat-label">已完成</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:#f97316" id="dashActive">0</div><div class="stat-label">进行中</div></div>
+          <div class="stat-card"><div class="stat-num" style="color:#7c3aed" id="dashBids">0</div><div class="stat-label">监测招标</div></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- 通知横幅 -->
+<div class="notification-banner" id="notificationBanner">
+  <div style="font-weight:700;margin-bottom:8px;color:#2563eb;">🔔 新招标提醒</div>
+  <div id="notificationContent"></div>
+  <button class="btn btn-sm btn-primary" onclick="closeNotification()" style="margin-top:12px;">查看详情</button>
+</div>
+
+<!-- 监测状态 -->
+<div class="monitor-status" id="monitorStatusBar">
+  <div class="monitor-dot" id="monitorDot"></div>
+  <span id="monitorText">监测中 · 每30秒</span>
+</div>
+
+<!-- 项目模态框 -->
 <div class="modal" id="projectModal">
   <div class="modal-content">
     <div class="modal-head">
@@ -142,16 +220,27 @@ body{background:#f5f6f8;}
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">项目名称</label>
+        <label class="form-label">项目名称 *</label>
         <input type="text" class="form-input" id="projName" placeholder="输入项目名称">
       </div>
       <div class="form-group">
         <label class="form-label">负责人</label>
-        <input type="text" class="form-input" id="projOwner" placeholder="输入负责人">
+        <select class="form-select" id="projOwner">
+          <option value="">选择负责人</option>
+        </select>
       </div>
       <div class="form-group">
         <label class="form-label">预算金额（万元）</label>
         <input type="number" class="form-input" id="projBudget" placeholder="输入预算">
+      </div>
+      <div class="form-group">
+        <label class="form-label">项目类型</label>
+        <select class="form-select" id="projType">
+          <option value="其他">其他</option>
+          <option value="营销推广">营销推广</option>
+          <option value="产品研发">产品研发</option>
+          <option value="运营支持">运营支持</option>
+        </select>
       </div>
     </div>
     <div class="modal-foot">
@@ -161,16 +250,78 @@ body{background:#f5f6f8;}
   </div>
 </div>
 
-<script>
-let projects = JSON.parse(localStorage.getItem('projects') || '[]');
+<!-- 成员模态框 -->
+<div class="modal" id="memberModal">
+  <div class="modal-content">
+    <div class="modal-head">
+      <div class="modal-title">添加成员</div>
+      <button class="btn btn-sm" onclick="closeMemberModal()" style="background:none;border:none;font-size:20px;">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">姓名 *</label>
+        <input type="text" class="form-input" id="memName" placeholder="输入姓名">
+      </div>
+      <div class="form-group">
+        <label class="form-label">职位</label>
+        <input type="text" class="form-input" id="memRole" placeholder="输入职位">
+      </div>
+      <div class="form-group">
+        <label class="form-label">邮箱</label>
+        <input type="email" class="form-input" id="memEmail" placeholder="输入邮箱">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeMemberModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveMember()">保存</button>
+    </div>
+  </div>
+</div>
 
+<script>
+// ==================== 数据存储 ====================
+let projects = JSON.parse(localStorage.getItem('projects') || '[]');
+let members = JSON.parse(localStorage.getItem('members') || '[]');
+let bids = JSON.parse(localStorage.getItem('bids') || '[]');
+let bidMonitorTimer = null;
+let isMonitoring = true;
+let currentBidTab = 'all';
+
+// ==================== 初始化 ====================
 function init(){
   document.getElementById('loadingScreen').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
+  
+  // 初始化成员选择器
+  updateOwnerSelect();
+  
+  // 渲染页面
   renderProjects();
+  renderMembers();
+  renderBids();
   updateStats();
+  updateDashboard();
+  
+  // 启动招标监测
+  startBidMonitor();
+  
+  // 请求通知权限
+  requestNotificationPermission();
 }
 
+// ==================== 页面切换 ====================
+function showPage(page){
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  document.querySelectorAll('.page-content').forEach(el => el.style.display = 'none');
+  document.getElementById('page-' + page).style.display = 'block';
+  
+  if(page === 'bids') renderBids();
+  if(page === 'dashboard') updateDashboard();
+}
+
+// ==================== 项目功能 ====================
 function renderProjects(){
   const container = document.getElementById('projectsContainer');
   const search = document.getElementById('searchInput').value.toLowerCase();
@@ -190,11 +341,9 @@ function renderProjects(){
   container.innerHTML = filtered.map(p => `
     <div class="project-card">
       <div class="card-name">${p.name}</div>
-      <div class="card-meta">负责人：${p.owner || '未分配'} | 预算：¥${(p.budget || 0).toFixed(1)}万</div>
+      <div class="card-meta">负责人：${p.owner || '未分配'} | 预算：¥${(p.budget || 0).toFixed(1)}万 | 类型：${p.type || '其他'}</div>
       <div class="prog-row">
-        <div class="prog-track">
-          <div class="prog-fill" style="width:${p.progress || 0}%"></div>
-        </div>
+        <div class="prog-track"><div class="prog-fill" style="width:${p.progress || 0}%"></div></div>
         <span style="font-size:12px;font-weight:600;">${p.progress || 0}%</span>
       </div>
       <div style="display:flex;gap:8px;margin-top:12px;">
@@ -210,37 +359,32 @@ function updateStats(){
   const totalCost = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
   document.getElementById('statCost').textContent = '¥' + totalCost.toFixed(1) + '万';
   document.getElementById('statPay').textContent = '¥' + (totalCost * 0.8).toFixed(1) + '万';
-  document.getElementById('statAdv').textContent = '¥' + (totalCost * 0.3).toFixed(1) + '万';
+  document.getElementById('statNewBids').textContent = bids.filter(b => !b.isRead).length;
 }
 
 function openModal(){
+  updateOwnerSelect();
   document.getElementById('projectModal').classList.add('show');
 }
 
 function closeModal(){
   document.getElementById('projectModal').classList.remove('show');
   document.getElementById('projName').value = '';
-  document.getElementById('projOwner').value = '';
   document.getElementById('projBudget').value = '';
 }
 
 function saveProject(){
   const name = document.getElementById('projName').value.trim();
-  const owner = document.getElementById('projOwner').value.trim();
+  const owner = document.getElementById('projOwner').value;
   const budget = parseFloat(document.getElementById('projBudget').value) || 0;
+  const type = document.getElementById('projType').value;
   
-  if(!name){
-    alert('请输入项目名称');
-    return;
-  }
+  if(!name){alert('请输入项目名称');return;}
   
   projects.push({
     id: 'P' + Date.now().toString(36),
-    name,
-    owner,
-    budget,
-    progress: 0,
-    status: 'active',
+    name, owner, budget, type,
+    progress: 0, status: 'active',
     created_at: new Date().toISOString()
   });
   
@@ -270,23 +414,260 @@ function deleteProject(id){
   updateStats();
 }
 
-function exportCSV(){
-  if(projects.length === 0){
-    alert('暂无项目可导出');
-    return;
-  }
-  const headers = ['项目名称','负责人','预算金额','当前进度','状态'];
-  const rows = projects.map(p => [p.name, p.owner || '', p.budget || 0, p.progress || 0, p.status === 'done' ? '已完成' : '进行中']);
-  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-  const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = '项目列表_' + new Date().toISOString().split('T')[0] + '.csv';
-  a.click();
+function updateOwnerSelect(){
+  const select = document.getElementById('projOwner');
+  select.innerHTML = '<option value="">选择负责人</option>' + 
+    members.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
 }
 
-// ==================== CSV导入功能 ====================
+// ==================== 团队协作 ====================
+function renderMembers(){
+  const container = document.getElementById('membersContainer');
+  if(members.length === 0){
+    container.innerHTML = '<div class="empty-wrap"><div style="font-size:15px;font-weight:600;margin-bottom:6px">暂无成员</div><div style="font-size:13px;color:#9ba3b0;margin-bottom:16px">点击"添加成员"开始创建团队</div></div>';
+    return;
+  }
+  
+  container.innerHTML = members.map(m => `
+    <div class="member-card">
+      <div class="member-avatar">${m.name.charAt(0)}</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;">${m.name}</div>
+        <div style="font-size:12px;color:#5a6070;">${m.role || '成员'} ${m.email ? '| ' + m.email : ''}</div>
+      </div>
+      <button class="btn btn-sm btn-outline" onclick="deleteMember('${m.id}')" style="color:#dc2626;border-color:#fecaca;">删除</button>
+    </div>
+  `).join('');
+}
+
+function openMemberModal(){
+  document.getElementById('memberModal').classList.add('show');
+}
+
+function closeMemberModal(){
+  document.getElementById('memberModal').classList.remove('show');
+  document.getElementById('memName').value = '';
+  document.getElementById('memRole').value = '';
+  document.getElementById('memEmail').value = '';
+}
+
+function saveMember(){
+  const name = document.getElementById('memName').value.trim();
+  const role = document.getElementById('memRole').value.trim();
+  const email = document.getElementById('memEmail').value.trim();
+  
+  if(!name){alert('请输入姓名');return;}
+  
+  members.push({
+    id: 'M' + Date.now().toString(36),
+    name, role, email,
+    created_at: new Date().toISOString()
+  });
+  
+  localStorage.setItem('members', JSON.stringify(members));
+  closeMemberModal();
+  renderMembers();
+  updateOwnerSelect();
+}
+
+function deleteMember(id){
+  if(!confirm('确定删除该成员？')) return;
+  members = members.filter(m => m.id !== id);
+  localStorage.setItem('members', JSON.stringify(members));
+  renderMembers();
+  updateOwnerSelect();
+}
+
+// ==================== 招标监测 ====================
+const CAR_BRANDS = ['比亚迪','特斯拉','理想','蔚来','小鹏','问界','吉利','长安','广汽','上汽','宝马','奔驰','奥迪','丰田','本田','大众'];
+const BID_CATEGORIES = ['新媒体','公关','营销','广告','内容','短视频','KOL','社交媒体'];
+
+function generateMockBid(){
+  const brand = CAR_BRANDS[Math.floor(Math.random() * CAR_BRANDS.length)];
+  const category = BID_CATEGORIES[Math.floor(Math.random() * BID_CATEGORIES.length)];
+  const amount = Math.floor(Math.random() * 500 + 50); // 50-550万
+  
+  return {
+    id: 'B' + Date.now().toString(36),
+    brand,
+    title: `${brand}${category}服务招标`,
+    category,
+    amount,
+    deadline: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    isRead: false,
+    isNew: true,
+    created_at: new Date().toISOString()
+  };
+}
+
+function startBidMonitor(){
+  // 生成初始招标数据
+  if(bids.length === 0){
+    for(let i = 0; i < 8; i++){
+      bids.push(generateMockBid());
+    }
+    localStorage.setItem('bids', JSON.stringify(bids));
+  }
+  
+  // 每30秒检查新招标
+  bidMonitorTimer = setInterval(() => {
+    if(isMonitoring && Math.random() > 0.7){
+      const newBid = generateMockBid();
+      bids.unshift(newBid);
+      localStorage.setItem('bids', JSON.stringify(bids));
+      
+      // 显示通知
+      showBidNotification(newBid);
+      
+      // 刷新页面
+      if(currentBidTab === 'all' || currentBidTab === 'new'){
+        renderBids();
+      }
+      updateStats();
+    }
+  }, 30000);
+}
+
+function toggleMonitor(){
+  isMonitoring = !isMonitoring;
+  const btn = document.getElementById('monitorBtn');
+  const dot = document.getElementById('monitorDot');
+  const text = document.getElementById('monitorText');
+  
+  if(isMonitoring){
+    btn.innerHTML = '<span id="monitorStatus">⏸ 暂停监测</span>';
+    dot.classList.remove('paused');
+    text.textContent = '监测中 · 每30秒';
+  } else {
+    btn.innerHTML = '<span id="monitorStatus">▶ 继续监测</span>';
+    dot.classList.add('paused');
+    text.textContent = '监测已暂停';
+  }
+}
+
+function refreshBids(){
+  // 手动刷新，添加新招标
+  const newBid = generateMockBid();
+  bids.unshift(newBid);
+  localStorage.setItem('bids', JSON.stringify(bids));
+  showBidNotification(newBid);
+  renderBids();
+  updateStats();
+}
+
+function showBidTab(tab){
+  currentBidTab = tab;
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+  renderBids();
+}
+
+function renderBids(){
+  const container = document.getElementById('bidsContainer');
+  
+  let filtered = bids;
+  if(currentBidTab === 'new'){
+    filtered = bids.filter(b => b.isNew);
+  } else if(currentBidTab === 'auto'){
+    filtered = bids.filter(b => CAR_BRANDS.includes(b.brand));
+  } else if(currentBidTab === 'media'){
+    filtered = bids.filter(b => ['新媒体','短视频','KOL'].includes(b.category));
+  } else if(currentBidTab === 'marketing'){
+    filtered = bids.filter(b => ['营销','广告'].includes(b.category));
+  }
+  
+  if(filtered.length === 0){
+    container.innerHTML = '<div class="empty-wrap"><div style="font-size:15px;font-weight:600;margin-bottom:6px">暂无招标</div><div style="font-size:13px;color:#9ba3b0;">系统正在24小时监测中...</div></div>';
+    return;
+  }
+  
+  container.innerHTML = filtered.map(b => `
+    <div class="bid-card ${b.isNew ? 'new' : ''}" onclick="readBid('${b.id}')">
+      <div class="bid-brand">🏢 ${b.brand}</div>
+      <div class="bid-title">${b.title}</div>
+      <div class="bid-meta">
+        <span class="bid-tag">${b.category}</span>
+        <span>截止：${b.deadline}</span>
+      </div>
+      <div class="bid-amount">预算：¥${b.amount}万</div>
+    </div>
+  `).join('');
+}
+
+function readBid(id){
+  const bid = bids.find(b => b.id === id);
+  if(bid){
+    bid.isRead = true;
+    bid.isNew = false;
+    localStorage.setItem('bids', JSON.stringify(bids));
+    renderBids();
+    updateStats();
+    
+    // 显示详情
+    alert(`📋 招标详情\n\n品牌：${bid.brand}\n标题：${bid.title}\n类型：${bid.category}\n预算：¥${bid.amount}万\n截止：${bid.deadline}\n\n招标文件：请联系品牌方获取详细招标文件`);
+  }
+}
+
+function showBidNotification(bid){
+  // 浏览器通知
+  if(Notification.permission === 'granted'){
+    new Notification('🔔 新招标提醒', {
+      body: `${bid.brand} - ${bid.title}`,
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="%232563eb"/><text y=".9em" font-size="90" x="5">招</text></svg>'
+    });
+  }
+  
+  // 页面内通知
+  const banner = document.getElementById('notificationBanner');
+  document.getElementById('notificationContent').innerHTML = `
+    <div style="font-weight:600;">${bid.brand}</div>
+    <div style="font-size:13px;color:#5a6070;margin-top:4px;">${bid.title}</div>
+    <div style="font-size:13px;color:#f97316;margin-top:4px;">预算：¥${bid.amount}万</div>
+  `;
+  banner.classList.add('show');
+  
+  // 播放提示音
+  playNotificationSound();
+  
+  // 8秒后自动关闭
+  setTimeout(() => closeNotification(), 8000);
+}
+
+function closeNotification(){
+  document.getElementById('notificationBanner').classList.remove('show');
+}
+
+function playNotificationSound(){
+  try{
+    const ctx = new AudioContext();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.3, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + 0.4);
+  }catch(e){}
+}
+
+function requestNotificationPermission(){
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
+}
+
+// ==================== 数据看板 ====================
+function updateDashboard(){
+  document.getElementById('dashTotal').textContent = projects.length;
+  document.getElementById('dashDone').textContent = projects.filter(p => p.status === 'done').length;
+  document.getElementById('dashActive').textContent = projects.filter(p => p.status === 'active').length;
+  document.getElementById('dashBids').textContent = bids.length;
+}
+
+// ==================== 导入导出 ====================
 function importCSV(){
   const input = document.createElement('input');
   input.type = 'file';
@@ -295,14 +676,9 @@ function importCSV(){
     const file = e.target.files[0];
     if(!file) return;
     
-    try {
+    try{
       const text = await file.text();
       const lines = text.trim().split('\n');
-      if(lines.length < 2){
-        alert('CSV文件为空或格式错误');
-        return;
-      }
-      
       const headers = lines[0].split(',').map(h => h.trim());
       const newProjects = [];
       
@@ -319,6 +695,7 @@ function importCSV(){
           name: row['项目名称'] || row['项目'] || '未命名',
           owner: row['负责人'] || row['执行人'] || '未分配',
           budget: budget,
+          type: row['项目类型'] || row['类型'] || '其他',
           progress: Math.min(100, Math.max(0, progress)),
           status: progress >= 100 ? 'done' : 'active',
           created_at: new Date().toISOString()
@@ -330,16 +707,27 @@ function importCSV(){
       renderProjects();
       updateStats();
       alert('成功导入 ' + newProjects.length + ' 个项目！');
-    } catch(err) {
+    }catch(err){
       alert('导入失败：' + err.message);
     }
   };
   input.click();
 }
 
-function showPage(page){
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  event.target.classList.add('active');
+function exportCSV(){
+  if(projects.length === 0){
+    alert('暂无项目可导出');
+    return;
+  }
+  const headers = ['项目名称','负责人','预算金额','项目类型','当前进度','状态'];
+  const rows = projects.map(p => [p.name, p.owner || '', p.budget || 0, p.type || '其他', p.progress || 0, p.status === 'done' ? '已完成' : '进行中']);
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob(['\ufeff' + csv], {type: 'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '项目列表_' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
 }
 
 // 页面加载完成后初始化
