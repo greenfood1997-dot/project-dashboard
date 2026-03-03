@@ -943,7 +943,7 @@ async function fetchAll(init=false){
     setSyncUI('connected'); return true;
   }catch(e){
     console.error(e); setSyncUI('error');
-    if(init) document.getElementById('loadingMsg').innerHTML=`<div style="text-align:center"><div style="color:#dc2626;font-weight:700;margin-bottom:8px">连接失败</div><div style="color:#5a6070;font-size:12px;margin-bottom:12px">${e.message}</div><button class="btn btn-primary btn-sm" onclick="location.reload()">重新连接</button></div>`;
+    // 不在此处显示错误，让init函数处理本地存储模式
     return false;
   }
 }
