@@ -1786,12 +1786,11 @@ async function requestNotifyPermission(){
 
 init();
 
-// ==================== CSV导入功能 ====================
 function importCSV(){
   const input=document.createElement('input');
   input.type='file';
   input.accept='.csv';
-  input.onchange=async(e)=>{
+  input.onchange=async(e)={
     const file=e.target.files[0];
     if(!file)return;
     const text=await file.text();
