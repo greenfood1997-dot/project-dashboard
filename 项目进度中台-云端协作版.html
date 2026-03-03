@@ -923,14 +923,12 @@ function setSyncUI(s){
 //  FETCH ALL DATA
 // ══════════════════════════════════════════
 async function fetchAll(init=false){
-  setSyncUI('syncing');
-  try{
-    const [pData,cData,mData,mpData]=await Promise.all([
-      api('projects?order=created_at.desc'),
-      api('contracts?order=created_at.desc'),
-      api('members?order=created_at.desc'),
-      api('member_projects?order=created_at.desc')
-    ]);
+  // 本地存储模式，不连接云端
+  projects = JSON.parse(localStorage.getItem('projects') || '[]');
+  contracts = JSON.parse(localStorage.getItem('contracts') || '[]');
+  members = JSON.parse(localStorage.getItem('members') || '[]');
+  memberProjects = JSON.parse(localStorage.getItem('memberProjects') || '[]');
+  return true;
     projects=(pData||[]).map(fromP);
       contracts=(cData||[]).map(fromC);
       members=(mData||[]).map(fromMem);
@@ -1489,11 +1487,19 @@ async function saveMember(){
 //  INIT
 // ══════════════════════════════════════════
 async function init(){
-  setSyncUI('connecting');
-  const ok=await fetchAll(true);
-  if(ok){
-    document.getElementById('loadingScreen').style.display='none';
-    document.getElementById('app').style.display='flex';
+  // 使用本地存储模式，不连接云端
+  projects = JSON.parse(localStorage.getItem('projects') || '[]');
+  contracts = JSON.parse(localStorage.getItem('contracts') || '[]');
+  members = JSON.parse(localStorage.getItem('members') || '[]');
+  memberProjects = JSON.parse(localStorage.getItem('memberProjects') || '[]');
+  
+  renderProjects(); updateProjStats();
+  renderContracts(); updateContractStats();
+  renderTeam(); updateTeamStats();
+  renderDashboard();
+  
+  document.getElementById('loadingScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
 
     window.addEventListener('resize',()=>{if(currentPage==='dashboard')renderDashboard();});
     loadBidConfig();
