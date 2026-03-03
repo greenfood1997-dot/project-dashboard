@@ -940,25 +940,38 @@ function setSyncUI(s){
 async function fetchAll(init=false){
   setSyncUI('syncing');
   try{
-    const [pData,cData,mData,mpData]=await Promise.all([
+    // 使用Promise.allSettled，即使部分失败也继续
+    const results = await Promise.allSettled([
       api('projects?order=created_at.desc'),
       api('contracts?order=created_at.desc'),
       api('members?order=created_at.desc'),
       api('member_projects?order=created_at.desc')
     ]);
+    
+    // 检查是否有任何请求成功
+    const hasSuccess = results.some(r => r.status === 'fulfilled');
+    if (!hasSuccess) {
+      throw new Error('所有请求失败');
+    }
+    
+    // 处理成功的结果
+    const pData = results[0].status === 'fulfilled' ? results[0].value : [];
+    const cData = results[1].status === 'fulfilled' ? results[1].value : [];
+    const mData = results[2].status === 'fulfilled' ? results[2].value : [];
+    const mpData = results[3].status === 'fulfilled' ? results[3].value : [];
+    
     projects=(pData||[]).map(fromP);
-      contracts=(cData||[]).map(fromC);
-      members=(mData||[]).map(fromMem);
-      memberProjects=(mpData||[]);
-      renderProjects(); updateProjStats();
-      renderContracts(); updateContractStats();
-      renderTeam(); updateTeamStats();
-      renderDashboard();
-      updateProjectDropdowns();
+    contracts=(cData||[]).map(fromC);
+    members=(mData||[]).map(fromMem);
+    memberProjects=(mpData||[]);
+    renderProjects(); updateProjStats();
+    renderContracts(); updateContractStats();
+    renderTeam(); updateTeamStats();
+    renderDashboard();
+    updateProjectDropdowns();
     setSyncUI('connected'); return true;
   }catch(e){
     console.error(e); setSyncUI('error');
-    // 不在此处显示错误，让init函数处理本地存储模式
     return false;
   }
 }
